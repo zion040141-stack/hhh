@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>헌법재판소를 탈출하라!</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR',sans-serif;background:#0d1117;color:#e8e3d8;min-height:100vh;display:flex;justify-content:center;padding:20px 14px 50px;}
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(180,160,100,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(180,160,100,0.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{width:100%;max-width:600px;position:relative;z-index:1;}
+.card{background:#111820;border:1px solid #1e2516;border-radius:14px;padding:26px 22px;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* ── 메인 ── */
+.main-badge{text-align:center;margin-bottom:14px;}
+.main-badge span{font-size:10px;letter-spacing:3px;color:#b4925a;border:1px solid #b4925a44;padding:3px 14px;}
+.main-title{font-family:'Noto Serif KR',serif;font-size:22px;color:#f0e8d0;text-align:center;margin-bottom:6px;line-height:1.4;}
+.main-title em{color:#d4a84b;font-style:normal;}
+.main-sub{font-size:12px;color:#5a5040;text-align:center;margin-bottom:6px;}
+.main-guide{font-size:12px;color:#4a8a5a;text-align:center;margin-bottom:20px;padding:7px 14px;background:#0d1a10;border:1px solid #2a4a2a;border-radius:6px;}
+.rooms-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+.room-card{background:#0d1117;border:1px solid #2a2416;border-radius:10px;padding:14px 12px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.room-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ac);opacity:0.5;transition:opacity 0.2s;}
+.room-card:hover::before{opacity:1;}
+.room-card:hover{border-color:#3a3020;transform:translateY(-2px);}
+.room-card.done{border-color:var(--ac)!important;}
+.room-card.done::before{opacity:1!important;}
+.rc-num{font-size:9px;letter-spacing:2px;color:#4a4030;margin-bottom:3px;}
+.rc-icon{font-size:20px;margin-bottom:5px;}
+.rc-name{font-size:13px;font-weight:700;color:#e8e3d8;line-height:1.3;}
+.rc-case{font-size:10px;color:#4a4030;margin-top:3px;}
+.rc-status{font-size:10px;margin-top:7px;display:flex;align-items:center;gap:4px;}
+.rc-dot{width:5px;height:5px;border-radius:50%;}
+.room-wide{grid-column:1/-1;}
+.progress-bar{background:#0d1117;border-radius:8px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.pb-label{font-size:11px;color:#4a4030;}
+.pb-dots{display:flex;gap:5px;}
+.pb-d{width:8px;height:8px;border-radius:50%;background:#1e1c18;border:1.5px solid #3a3020;transition:all 0.3s;}
+.pb-d.done{background:#d4a84b;border-color:#d4a84b;}
+
+/* ── 방 공통 ── */
+.room-header{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.r-tag{font-size:9px;letter-spacing:2px;padding:3px 9px;border:1px solid;border-radius:2px;}
+.r-label{font-size:11px;color:#5a5040;}
+.r-back{margin-left:auto;font-size:11px;color:#3a3020;cursor:pointer;background:none;border:none;font-family:'Noto Sans KR',sans-serif;transition:color 0.2s;}
+.r-back:hover{color:#8a7f6e;}
+
+/* ── 판례 배지 ── */
+.case-badge{display:flex;align-items:center;gap:10px;background:#0d1117;border:1px solid #2a2416;border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.case-badge-icon{font-size:18px;flex-shrink:0;}
+.case-badge-info{flex:1;min-width:0;}
+.case-badge-title{font-size:10px;color:#8a7a5e;margin-bottom:2px;}
+.case-badge-name{font-size:13px;color:#d4a84b;font-weight:700;line-height:1.3;}
+.case-badge-num{font-size:11px;color:#5a5040;}
+.case-link{font-size:10px;color:#4a90d9;border:1px solid #4a90d922;padding:3px 8px;border-radius:3px;text-decoration:none;flex-shrink:0;white-space:nowrap;transition:all 0.2s;}
+.case-link:hover{background:#0d1a2a;color:#6ab0f9;}
+
+/* ── 사건 기록 ── */
+.comic-label{font-size:10px;letter-spacing:2px;color:var(--room-ac,#d4a84b);margin-bottom:8px;opacity:0.8;}
+.comic-panel{background:#0d1117;border:1px solid #1e2010;border-radius:10px;overflow:hidden;}
+.comic-scene{display:flex;border-bottom:1px solid #1a1e14;}
+.comic-scene:last-of-type{border-bottom:none;}
+.char-box{min-width:58px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;border-right:1px solid #1a1e14;gap:3px;flex-shrink:0;}
+.char-emoji{font-size:22px;line-height:1;}
+.char-name{font-size:8px;color:#3a4030;text-align:center;}
+.bubble-box{flex:1;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:5px;}
+.bubble{background:#161d14;border-radius:5px;padding:7px 10px;font-size:12px;line-height:1.7;color:#c0baa8;}
+.bubble.narrate{background:#0d150d;border-left:2px solid var(--room-ac,#5cb87a);border-radius:0 5px 5px 0;}
+.bubble em{color:var(--room-ac,#d4a84b);font-style:normal;font-weight:700;}
+.bubble strong{color:#e8e3d8;font-weight:700;}
+.comic-footer{background:#0a100a;padding:9px 13px;font-size:11px;color:#4a6040;border-top:1px solid #1a1e14;line-height:1.6;}
+
+/* ── 재판의 전제성 박스 (ROOM01) ── */
+.premise-box{background:#0d1a2a;border:1px solid #1e3050;border-radius:8px;padding:12px 14px;margin-top:12px;}
+.premise-box-title{font-size:10px;letter-spacing:1.5px;color:#4a90d9;margin-bottom:8px;}
+.premise-item{font-size:12px;color:#a0b4c8;line-height:1.8;padding-left:4px;}
+.premise-item span{color:#6ab0f9;font-weight:700;}
+
+/* ── 절차 다이어그램 (ROOM01) ── */
+.flow-diagram{display:flex;align-items:center;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.flow-box{background:#0d1117;border:1px solid #2a3a4a;border-radius:6px;padding:8px 10px;text-align:center;flex:1;min-width:80px;}
+.flow-box-title{font-size:9px;color:#4a90d9;margin-bottom:4px;letter-spacing:0.5px;}
+.flow-box-body{font-size:11px;color:#c0baa8;line-height:1.5;}
+.flow-arrow{font-size:16px;color:#3a4a5a;flex-shrink:0;}
+
+/* ── 클리어 배너 ── */
+.done-banner{background:#0a1a0a;border:1px solid #3a5a3a;border-radius:8px;padding:12px 15px;margin-bottom:12px;display:none;text-align:center;}
+.done-banner-text{font-size:13px;color:#7dd87d;font-weight:700;}
+.done-banner-sub{font-size:11px;color:#4a6a4a;margin-top:2px;}
+
+/* ── 하단 버튼 ── */
+.room-footer{margin-top:20px;display:flex;gap:10px;align-items:center;justify-content:flex-end;}
+.btn-back{background:none;color:#5a5040;border:1px solid #2a2416;border-radius:8px;padding:11px 18px;font-size:13px;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;}
+.btn-back:hover{color:#8a7f6e;border-color:#3a3020;}
+.btn-done{background:var(--room-ac,#d4a84b);color:#0d1117;border:none;border-radius:8px;padding:11px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;}
+.btn-done:hover{filter:brightness(1.12);}
+.btn-done:disabled{opacity:0.45;cursor:default;filter:none;}
+
+/* ── 최종 클리어 ── */
+.final-wrap{text-align:center;padding:12px 0 8px;}
+.final-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:16px 0 20px;}
+.final-item{background:#0d1117;border-radius:8px;padding:11px 12px;font-size:12px;color:#c8c0b0;line-height:1.7;border-left:2px solid var(--c);text-align:left;}
+.final-item strong{display:block;font-size:10px;color:#4a4030;letter-spacing:1px;margin-bottom:3px;}
+.final-item em{color:#d4a84b;font-style:normal;}
+.restart-btn{background:#d4a84b;color:#0d1117;border:none;border-radius:8px;padding:11px 26px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s;}
+.restart-btn:hover{background:#e8bc62;}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="wrap">
+<div class="card">
+
+<!-- 메인 -->
+<div class="screen active" id="s-main">
+  <div class="main-badge"><span>헌법재판소 탈출 프로젝트</span></div>
+  <h1 class="main-title">🏛️ <em>헌법재판소</em>를<br>탈출하라!</h1>
+  <p class="main-sub">실제 판례를 읽고 학습지를 완성하라</p>
+  <p class="main-guide">✅ 모든 방에 자유롭게 입장 가능합니다</p>
+  <div class="rooms-grid">
+    <div class="room-card" id="rc0" style="--ac:#4a90d9" onclick="goRoom(0)">
+      <div class="rc-num">ROOM 01</div><div class="rc-icon">⚖️</div>
+      <div class="rc-name">위헌법률심판</div><div class="rc-case">2008헌가25</div>
+      <div class="rc-status"><div class="rc-dot" style="background:#4a90d9"></div><span id="rs0" style="color:#4a90d9">입장 가능</span></div>
+    </div>
+    <div class="room-card" id="rc1" style="--ac:#e05c5c" onclick="goRoom(1)">
+      <div class="rc-num">ROOM 02</div><div class="rc-icon">🏳️</div>
+      <div class="rc-name">정당해산심판</div><div class="rc-case">2013헌다1</div>
+      <div class="rc-status"><div class="rc-dot" style="background:#e05c5c"></div><span id="rs1" style="color:#e05c5c">입장 가능</span></div>
+    </div>
+    <div class="room-card" id="rc2" style="--ac:#c97de0" onclick="goRoom(2)">
+      <div class="rc-num">ROOM 03</div><div class="rc-icon">🤝</div>
+      <div class="rc-name">권한쟁의심판</div><div class="rc-case">2009헌라8</div>
+      <div class="rc-status"><div class="rc-dot" style="background:#c97de0"></div><span id="rs2" style="color:#c97de0">입장 가능</span></div>
+    </div>
+    <div class="room-card" id="rc3" style="--ac:#e0a84b" onclick="goRoom(3)">
+      <div class="rc-num">ROOM 04</div><div class="rc-icon">🔨</div>
+      <div class="rc-name">탄핵심판</div><div class="rc-case">2004헌나1 · 2016헌나1</div>
+      <div class="rc-status"><div class="rc-dot" style="background:#e0a84b"></div><span id="rs3" style="color:#e0a84b">입장 가능</span></div>
+    </div>
+    <div class="room-card room-wide" id="rc4" style="--ac:#5cb87a" onclick="goRoom(4)">
+      <div class="rc-num">FINAL ROOM 05</div><div class="rc-icon">📜</div>
+      <div class="rc-name">헌법소원심판</div><div class="rc-case">2010헌마47</div>
+      <div class="rc-status"><div class="rc-dot" style="background:#5cb87a"></div><span id="rs4" style="color:#5cb87a">입장 가능</span></div>
+    </div>
+  </div>
+  <div class="progress-bar">
+    <span class="pb-label">클리어</span>
+    <div class="pb-dots">
+      <div class="pb-d" id="pb0"></div><div class="pb-d" id="pb1"></div>
+      <div class="pb-d" id="pb2"></div><div class="pb-d" id="pb3"></div><div class="pb-d" id="pb4"></div>
+    </div>
+    <span class="pb-label" id="pb-cnt">0 / 5</span>
+  </div>
+</div>
+
+
+<!-- ROOM 01 · 위헌법률심판 -->
+<div class="screen" id="s-r0" style="--room-ac:#4a90d9">
+  <div class="room-header">
+    <span class="r-tag" style="color:#4a90d9;border-color:#4a90d9">ROOM 01</span>
+    <span class="r-label">⚖️ 위헌법률심판</span>
+    <button class="r-back" onclick="goMain()">← 나가기</button>
+  </div>
+  <div class="done-banner" id="done-r0"><div class="done-banner-text">⭐ 클리어 완료!</div><div class="done-banner-sub">다시 읽어볼 수 있어요.</div></div>
+
+  <div class="case-badge">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례</div>
+      <div class="case-badge-name">야간 옥외집회 금지 헌법불합치</div>
+      <div class="case-badge-num">헌재 2009.9.24. 2008헌가25</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2008헌가25" target="_blank">판례 보기 ↗</a>
+  </div>
+
+  <div class="comic-label">📖 사건 기록</div>
+  <div class="comic-panel">
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">👨</div><div class="char-name">안진걸씨</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2008년, 안진걸 씨는 광우병 관련 <em>야간 촛불집회</em>에 참가했다가 <strong>집회 및 시위에 관한 법률 제10조</strong> 위반으로 기소되었다. 이 법은 해가 진 후 야외집회를 원칙적으로 <em>전면 금지</em>하고 있었다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🧑‍⚖️</div><div class="char-name">판사</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">재판을 맡은 서울중앙지법 박재영 판사는 이 법이 <em>집회의 자유</em>를 과도하게 침해할 수 있다고 판단했다.</div>
+        <div class="bubble">"직장인·학생은 낮에 집회 참가가 어렵습니다. 야간집회를 무조건 금지하면 이들의 집회의 자유가 실질적으로 박탈됩니다."</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🧑‍⚖️</div><div class="char-name">판사</div></div>
+      <div class="bubble-box">
+        <div class="bubble">"이 법률이 헌법에 위반되는지, 그 <em>위헌 여부가 재판의 전제</em>가 됩니다. 헌법재판소에 위헌법률심판을 <em>제청</em>합니다!"</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2009년, 헌법재판소는 <em>헌법불합치</em> 결정을 내렸다. 야간집회를 전면 금지한 조항은 집회의 자유를 과도하게 제한하여 헌법에 맞지 않는다고 판단한 것이다.</div>
+      </div>
+    </div>
+    <div class="comic-footer">💡 포인트: 법원이 재판 중 법률의 위헌 의심 → 스스로 판단하지 않고 헌법재판소에 '제청' → 헌재가 그 법률의 위헌 여부를 심판함.</div>
+  </div>
+
+  <div class="premise-box">
+    <div class="premise-box-title">📌 재판의 전제성 — 3가지 조건</div>
+    <div class="premise-item">① 구체적 사건이 법원에 <span>계속</span> 중</div>
+    <div class="premise-item">② 그 법률이 해당 재판에 <span>적용</span></div>
+    <div class="premise-item">③ 위헌 여부에 따라 <span>다른 내용의 재판</span>을 하게 됨</div>
+  </div>
+
+  <div class="flow-diagram">
+    <div class="flow-box"><div class="flow-box-title">당 사 자</div><div class="flow-box-body">위헌법률심판<br>제청 [신청]</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="flow-box-title">법 원</div><div class="flow-box-body">위헌법률심판<br>[제청]</div></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box"><div class="flow-box-title">헌법재판소</div><div class="flow-box-body">위헌법률<br>[심판]</div></div>
+  </div>
+
+  <div class="room-footer">
+    <button class="btn-back" onclick="goMain()">← 목록으로</button>
+    <button class="btn-done" id="btn-done-r0" onclick="markDone(0)">읽었어요 ✓</button>
+  </div>
+</div>
+
+
+<!-- ROOM 02 · 정당해산심판 -->
+<div class="screen" id="s-r1" style="--room-ac:#e05c5c">
+  <div class="room-header">
+    <span class="r-tag" style="color:#e05c5c;border-color:#e05c5c">ROOM 02</span>
+    <span class="r-label">🏳️ 정당해산심판</span>
+    <button class="r-back" onclick="goMain()">← 나가기</button>
+  </div>
+  <div class="done-banner" id="done-r1"><div class="done-banner-text">⭐ 클리어 완료!</div><div class="done-banner-sub">다시 읽어볼 수 있어요.</div></div>
+
+  <div class="case-badge">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례</div>
+      <div class="case-badge-name">통합진보당 해산 결정</div>
+      <div class="case-badge-num">헌재 2014.12.19. 2013헌다1</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2013헌다1" target="_blank">판례 보기 ↗</a>
+  </div>
+
+  <div class="comic-label">📖 사건 기록</div>
+  <div class="comic-panel">
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">📰</div><div class="char-name">뉴스</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2013년, 통합진보당 소속 국회의원 이석기가 내란음모 혐의로 기소되었다. 검찰 수사 결과, 통합진보당 내 일부 세력이 <em>북한식 사회주의 실현</em>을 목표로 활동해 온 정황이 드러났다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏢</div><div class="char-name">정부</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate"><strong>2013년 11월 5일</strong> — 정부는 국무회의 심의·의결을 거쳐 통합진보당의 목적과 활동이 <em>민주적 기본질서에 위배</em>된다고 판단하고, 헌법재판소에 해산 심판을 청구했다. 대한민국 헌정 사상 최초의 정당해산 청구였다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate"><strong>2014년 12월 19일</strong> — 재판관 8 대 1로 해산 결정! 통합진보당 소속 국회의원 5명은 의원직을 자동으로 상실했다.</div>
+      </div>
+    </div>
+    <div class="comic-footer">💡 포인트: 개인이나 국회가 아닌 '정부'가 국무회의 심의 후 청구. 해산 결정 시 소속 의원 의원직 자동 상실.</div>
+  </div>
+
+  <div class="room-footer">
+    <button class="btn-back" onclick="goMain()">← 목록으로</button>
+    <button class="btn-done" id="btn-done-r1" onclick="markDone(1)">읽었어요 ✓</button>
+  </div>
+</div>
+
+
+<!-- ROOM 03 · 권한쟁의심판 -->
+<div class="screen" id="s-r2" style="--room-ac:#c97de0">
+  <div class="room-header">
+    <span class="r-tag" style="color:#c97de0;border-color:#c97de0">ROOM 03</span>
+    <span class="r-label">🤝 권한쟁의심판</span>
+    <button class="r-back" onclick="goMain()">← 나가기</button>
+  </div>
+  <div class="done-banner" id="done-r2"><div class="done-banner-text">⭐ 클리어 완료!</div><div class="done-banner-sub">다시 읽어볼 수 있어요.</div></div>
+
+  <div class="case-badge">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례</div>
+      <div class="case-badge-name">미디어법 — 국회의원 심의·표결권 침해</div>
+      <div class="case-badge-num">헌재 2009.10.29. 2009헌라8</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2009헌라8" target="_blank">판례 보기 ↗</a>
+  </div>
+
+  <div class="comic-label">📖 사건 기록</div>
+  <div class="comic-panel">
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">📋</div><div class="char-name">배경</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2009년 7월, 국회에서 <em>방송법·신문법 등 미디어법</em>을 처리하는 과정에서 여야 의원들이 심각하게 충돌했다. 야당 의원들은 법안 통과를 막기 위해 본회의장 의장석 앞을 점거했다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">국회의장</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">국회의장은 야당 의원들이 의장석 주변을 점거한 상황에서, <em>별도의 단상(임시 마이크)</em>을 이용해 표결을 선포했다. 이 과정에서 일부 야당 의원들은 표결 시작을 인지하지 못했고, 일부는 의장을 막는 과정에서 정상적으로 <em>표결 버튼을 누르지 못했다</em>.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">😤</div><div class="char-name">야당의원</div></div>
+      <div class="bubble-box">
+        <div class="bubble">"법률안을 <em>심의하고 표결</em>할 권리는 헌법이 부여한 우리의 <em>권한</em>입니다! 국회의장이 절차를 어겨 그 권한을 침해했습니다!"</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">헌법재판소는 국회의원과 국회의장 사이에 <em>권한의 유무 또는 범위</em>에 관한 다툼이 발생했다고 보고, 국회의장이 일부 의원들의 <em>심의·표결권</em>을 침해했음을 확인했다.</div>
+      </div>
+    </div>
+    <div class="comic-footer">💡 포인트: 국가기관들 사이에서 "이게 내 권한인가, 아닌가?" "어디까지 내 권한인가?" — 이 다툼을 권한쟁의심판으로 해결한다.</div>
+  </div>
+
+  <div class="room-footer">
+    <button class="btn-back" onclick="goMain()">← 목록으로</button>
+    <button class="btn-done" id="btn-done-r2" onclick="markDone(2)">읽었어요 ✓</button>
+  </div>
+</div>
+
+
+<!-- ROOM 04 · 탄핵심판 -->
+<div class="screen" id="s-r3" style="--room-ac:#e0a84b">
+  <div class="room-header">
+    <span class="r-tag" style="color:#e0a84b;border-color:#e0a84b">ROOM 04</span>
+    <span class="r-label">🔨 탄핵심판</span>
+    <button class="r-back" onclick="goMain()">← 나가기</button>
+  </div>
+  <div class="done-banner" id="done-r3"><div class="done-banner-text">⭐ 클리어 완료!</div><div class="done-banner-sub">다시 읽어볼 수 있어요.</div></div>
+
+  <div class="case-badge">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례 ①</div>
+      <div class="case-badge-name">노무현 대통령 탄핵 기각</div>
+      <div class="case-badge-num">헌재 2004.5.14. 2004헌나1</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2004헌나1" target="_blank">판례 보기 ↗</a>
+  </div>
+  <div class="case-badge" style="margin-top:-4px;">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례 ②</div>
+      <div class="case-badge-name">박근혜 대통령 탄핵 인용</div>
+      <div class="case-badge-num">헌재 2017.3.10. 2016헌나1</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2016헌나1" target="_blank">판례 보기 ↗</a>
+  </div>
+
+  <div class="comic-label">📖 사건 기록</div>
+  <div class="comic-panel">
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🎙️</div><div class="char-name">노대통령</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate"><strong>[사건 ①] 노무현 대통령 탄핵 (2004)</strong><br>노무현 대통령은 대통령으로서 기자회견(직무 수행)을 하면서 특정 정당 지지 발언을 했다. 선거관리위원회가 경고 공문을 보냈지만, 이에 불복하는 발언을 이어갔다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">국회</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">소추 이유:<br><em>직무 집행</em> 중 <em>헌법이나 법률을 위배</em>했다는 것.</div>
+        <div class="bubble narrate">2004년 3월 12일, 재적의원 271명 중 193명 찬성으로 탄핵소추안 가결.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">헌재는 선거법 위반 사실을 인정했으나, "<em>파면을 정당화할 만큼 중대한 위반은 아니다</em>"라며 탄핵소추를 <strong>기각</strong>. 노 대통령은 64일 만에 직무 복귀.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🗝️</div><div class="char-name">박대통령</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate"><strong>[사건 ②] 박근혜 대통령 탄핵 (2016~2017)</strong><br>박근혜 대통령은 <em>직무 수행</em> 과정에서 민간인 최순실에게 국정 기밀 문건을 유출하고, 기업들에게 재단 출연금을 강제 모금하는 등 <em>헌법상 직권을 남용</em>했다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">국회</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">소추 이유:<br><em>직무 집행</em> 중 <em>헌법이나 법률을 위배</em>했다는 것.</div>
+        <div class="bubble narrate">2016년 12월 9일, 재적의원 300명 중 234명 찬성으로 탄핵소추안 가결.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2017년 3월 10일, 재판관 <em>전원일치(8 대 0)</em>로 탄핵 <strong>인용</strong>. 박근혜 대통령은 대통령직에서 파면되었다.</div>
+      </div>
+    </div>
+    <div class="comic-footer">💡 포인트: 탄핵 요건 = '<strong>직무 집행</strong>' 중에 '<strong>헌법이나 법률을 위배</strong>'해야 함. 또한 위반이 파면을 정당화할 만큼 중대해야 함 (노무현: 기각 / 박근혜: 인용).</div>
+  </div>
+
+  <div class="room-footer">
+    <button class="btn-back" onclick="goMain()">← 목록으로</button>
+    <button class="btn-done" id="btn-done-r3" onclick="markDone(3)">읽었어요 ✓</button>
+  </div>
+</div>
+
+
+<!-- FINAL ROOM 05 · 헌법소원심판 -->
+<div class="screen" id="s-r4" style="--room-ac:#5cb87a">
+  <div class="room-header">
+    <span class="r-tag" style="color:#5cb87a;border-color:#5cb87a">FINAL 05</span>
+    <span class="r-label">📜 헌법소원심판</span>
+    <button class="r-back" onclick="goMain()">← 나가기</button>
+  </div>
+  <div class="done-banner" id="done-r4"><div class="done-banner-text">⭐ 클리어 완료!</div><div class="done-banner-sub">다시 읽어볼 수 있어요.</div></div>
+
+  <div class="case-badge">
+    <div class="case-badge-icon">📄</div>
+    <div class="case-badge-info">
+      <div class="case-badge-title">실제 판례</div>
+      <div class="case-badge-name">인터넷 실명제 위헌 결정</div>
+      <div class="case-badge-num">헌재 2012.8.23. 2010헌마47</div>
+    </div>
+    <a class="case-link" href="https://casenote.kr/헌법재판소/2010헌마47" target="_blank">판례 보기 ↗</a>
+  </div>
+
+  <div class="comic-label">📖 사건 기록</div>
+  <div class="comic-panel">
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">💻</div><div class="char-name">청구인들</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">당시 법률(정보통신망법)은 인터넷 게시판에 댓글을 달거나 글을 올리려면 반드시 <em>본인 확인 절차</em>를 거쳐야 한다고 규정했다. 이른바 <strong>'인터넷 실명제'</strong>다.</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">😤</div><div class="char-name">청구인들</div></div>
+      <div class="bubble-box">
+        <div class="bubble">"국가 기관(방통위)이 만든 이 법 때문에 익명으로 의견을 표현할 수 없게 됐습니다. 이건 헌법이 보장하는 <em>표현의 자유</em>, 즉 <em>기본권</em>을 침해하는 것입니다!"</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">⚖️</div><div class="char-name">변호사</div></div>
+      <div class="bubble-box">
+        <div class="bubble">"다른 구제 방법이 없으니, 헌법재판소에 직접 <em>헌법소원심판</em>을 청구합시다. 공권력의 행사로 <em>헌법상 보장받은 기본권</em>을 침해받은 경우 국민이 직접 청구할 수 있어요."</div>
+      </div>
+    </div>
+    <div class="comic-scene">
+      <div class="char-box"><div class="char-emoji">🏛️</div><div class="char-name">헌재</div></div>
+      <div class="bubble-box">
+        <div class="bubble narrate">2012년 8월 23일, 재판관 <em>전원일치</em>로 <strong>위헌</strong> 결정! 인터넷 실명제는 표현의 자유를 침해하여 헌법에 위반된다. → 해당 법률 조항 <em>취소</em>.</div>
+      </div>
+    </div>
+    <div class="comic-footer">💡 포인트: 국민이 공권력으로 기본권을 침해받으면 → 헌법재판소에 직접 청구 → 인용 시 공권력 행사를 취소하거나 불행사가 위헌임을 확인.</div>
+  </div>
+
+  <div class="room-footer">
+    <button class="btn-back" onclick="goMain()">← 목록으로</button>
+    <button class="btn-done" id="btn-done-r4" onclick="markDone(4)">읽었어요 ✓</button>
+  </div>
+</div>
+
+
+<!-- 최종 클리어 -->
+<div class="screen" id="s-final">
+  <div class="final-wrap">
+    <div style="font-size:54px;margin-bottom:14px;">🏆</div>
+    <h2 style="font-family:'Noto Serif KR',serif;font-size:23px;color:#f0e8d0;margin-bottom:8px;">탈출 성공!</h2>
+    <p style="font-size:13px;color:#6b6055;margin-bottom:4px;line-height:1.7;">5개의 실제 판례를 모두 읽었습니다.</p>
+    <p style="font-size:12px;color:#4a4030;margin-bottom:20px;">이제 학습지의 빈칸을 완성해봐요.</p>
+    <div class="final-grid">
+      <div class="final-item" style="--c:#4a90d9">
+        <strong>⚖️ 위헌법률심판 · 2008헌가25</strong>
+        <em>재판의 전제</em>가 된 법률의 위헌 여부 — 법원이 <em>제청</em> → 헌재 <em>심판</em>
+      </div>
+      <div class="final-item" style="--c:#e05c5c">
+        <strong>🏳️ 정당해산심판 · 2013헌다1</strong>
+        <em>민주적 기본질서</em> 위배 정당을<br><em>정부</em>가 청구 → 해산
+      </div>
+      <div class="final-item" style="--c:#c97de0">
+        <strong>🤝 권한쟁의심판 · 2009헌라8</strong>
+        기관 간 <em>권한의 유무</em><br>또는 <em>범위</em> 다툼 심판
+      </div>
+      <div class="final-item" style="--c:#e0a84b">
+        <strong>🔨 탄핵심판 · 2004헌나1 / 2016헌나1</strong>
+        <em>직무 집행</em> 중<br><em>헌법·법률 위배</em> 심판
+      </div>
+      <div class="final-item room-wide" style="--c:#5cb87a">
+        <strong>📜 헌법소원심판 · 2010헌마47</strong>
+        공권력으로 <em>헌법상 보장받은 기본권</em> 침해 시 국민 직접 청구 → 공권력 <em>취소</em> 또는 불행사 <em>위헌</em> 확인
+      </div>
+    </div>
+    <button class="restart-btn" onclick="restart()">처음으로 돌아가기</button>
+  </div>
+</div>
+
+</div></div>
+
+<script>
+var cleared = [false,false,false,false,false];
+var acColors = ['#4a90d9','#e05c5c','#c97de0','#e0a84b','#5cb87a'];
+
+function markDone(rIdx){
+  if(!cleared[rIdx]){ cleared[rIdx] = true; }
+  var btn = document.getElementById('btn-done-r'+rIdx);
+  btn.textContent = '✓ 완료';
+  btn.disabled = true;
+  updateMain();
+  if(cleared.every(Boolean)){
+    setTimeout(function(){ showScreen('s-final'); }, 400);
+  }
+}
+
+function updateMain(){
+  var cnt = cleared.filter(Boolean).length;
+  document.getElementById('pb-cnt').textContent = cnt + ' / 5';
+  for(var i = 0; i < 5; i++){
+    document.getElementById('pb'+i).classList.toggle('done', cleared[i]);
+    var banner = document.getElementById('done-r'+i);
+    if(banner) banner.style.display = cleared[i] ? 'block' : 'none';
+    document.getElementById('rc'+i).classList.toggle('done', cleared[i]);
+    var rs = document.getElementById('rs'+i);
+    if(rs){ rs.textContent = cleared[i] ? '✓ 완료' : '입장 가능'; rs.style.color = cleared[i] ? '#5cb87a' : acColors[i]; }
+    var btn = document.getElementById('btn-done-r'+i);
+    if(btn && cleared[i]){ btn.textContent='✓ 완료'; btn.disabled=true; }
+  }
+}
+
+function goRoom(rIdx){ showScreen('s-r'+rIdx); updateMain(); }
+function goMain(){ showScreen('s-main'); updateMain(); }
+
+function restart(){
+  cleared = [false,false,false,false,false];
+  for(var i = 0; i < 5; i++){
+    var btn = document.getElementById('btn-done-r'+i);
+    if(btn){ btn.textContent='읽었어요 ✓'; btn.disabled=false; }
+  }
+  updateMain();
+  showScreen('s-main');
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+updateMain();
+</script>
+</body>
+</html>
